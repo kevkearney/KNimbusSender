@@ -22,15 +22,11 @@ Weather_t;
 
 class KnimbusRadio
 {
-  public:
+  public: 
     void SetupRadio();
     bool XMitWeather(Weather_t weatherData, const String &responseMsg);
     bool XMitLightning(String lightningType,int lightningDistance);
   private:
-    bool PowerOnRadioAndXMit(void* buf,int size,const String &responseMsg);
-    
-    /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
-    RF24 radio(7,8);
-    const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
+    bool PowerOnRadioAndXMit(void* buf,int size,const String &responseMsg);    
 };
 #endif

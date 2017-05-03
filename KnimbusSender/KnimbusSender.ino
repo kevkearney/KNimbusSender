@@ -1,7 +1,7 @@
+#include <AS3935mod.h>
 
 #include <Adafruit_BME280.h>
 #include <Adafruit_TSL2561_U.h>
-#include <AS3935mod.h>
 
 #include <DHT.h>
 #include "KnimbusRadio.h"
@@ -15,6 +15,7 @@ Adafruit_TSL2561_Unified tsl = Adafruit_TSL2561_Unified(TSL2561_ADDR_FLOAT, 1234
 #define MOD1016IRQ_PIN 2  //Lightning Sensor IRQ
 
 DHT dht(DHTPIN, DHTTYPE);
+KnimbusRadio kRadio;
 
 //Altitude of Station
 const short stationAltitude = 342;
@@ -29,7 +30,7 @@ void alert() {
 void setup() {
   delay(3000);
   Serial.begin(9600);
-  SetupRadio();
+  kRadio.SetupRadio();
   InitializeBarometer();
   InitializeThermometer();
   InitializeLightSensor();
@@ -49,7 +50,7 @@ void loop() {
   String radioResponse;
   
   Serial.println("Ready to Transmit"); 
-  bool xmitSuccess = XMitWeather(weatherData, radioResponse);
+  bool xmitSuccess = kRadio.XMitWeather(weatherData, radioResponse);
   if(xmitSuccess){
     Serial.println("Successful Transmit"); 
     sleepTime = ParseSleepTimeResponse(radioResponse);
@@ -103,16 +104,16 @@ void translateIRQ(uns8 irq) {
   switch(irq) {
       case 1:
         Serial.println("NOISE DETECTED");
-        XMitLightning("LNoise",0);
+        kRadio.XMitLightning("LNoise",0);
         break;
       case 4:
         Serial.println("DISTURBER DETECTED");
-         XMitLightning("LDisturber",0);
+         kRadio.XMitLightning("LDisturber",0);
         break;
       case 8: 
         Serial.println("LIGHTNING DETECTED");
         int lightningDistance = mod1016.calculateDistance();
-        XMitLightning("Lightning:",lightningDistance);
+        kRadio.XMitLightning("Lightning:",lightningDistance);
         printDistance();
         break;
     }

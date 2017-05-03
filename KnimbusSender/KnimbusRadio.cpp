@@ -1,4 +1,7 @@
 #include "KnimbusRadio.h"
+/* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
+RF24 radio(7,8);
+const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
 
 void KnimbusRadio::SetupRadio(){
   radio.begin();
@@ -37,7 +40,7 @@ bool KnimbusRadio::XMitLightning(String lightningType,int lightningDistance){
   PowerOnRadioAndXMit(&data,sizeof(data),responseMsg);
 }
 
-bool PowerOnRadioAndXMit(void* buf,int size,const String &responseMsg){
+bool KnimbusRadio::PowerOnRadioAndXMit(void* buf,int size,const String &responseMsg){
   radio.powerUp();
   
   delay(2000);
