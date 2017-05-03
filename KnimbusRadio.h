@@ -30,3 +30,7 @@ class KnimbusRadio
     bool PowerOnRadioAndXMit(void* buf, int size, const String &responseMsg);
 };
 #endif
+
+
+
+
