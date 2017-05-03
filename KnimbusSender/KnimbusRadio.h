@@ -11,22 +11,22 @@
 #include <Arduino.h>
 
 //Weather Struct
-typedef struct{
-    float Temperature;
-    unsigned int Humidity;
-    float BaroPressure;
-    float BaroTemperature;
-    float Lux;
+typedef struct {
+  float Temperature;
+  unsigned int Humidity;
+  float BaroPressure;
+  float BaroTemperature;
+  float Lux;
 }
 Weather_t;
 
 class KnimbusRadio
 {
-  public: 
+  public:
     void SetupRadio();
     bool XMitWeather(Weather_t weatherData, const String &responseMsg);
-    bool XMitLightning(String lightningType,int lightningDistance);
+    bool XMitLightning(String lightningType, int lightningDistance);
   private:
-    bool PowerOnRadioAndXMit(void* buf,int size,const String &responseMsg);    
+    bool PowerOnRadioAndXMit(void* buf, int size, const String &responseMsg);
 };
 #endif

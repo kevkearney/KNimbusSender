@@ -39,53 +39,53 @@ void setup() {
 
 void loop() {
   Weather_t weatherData;
-  
-  float fltHumidity;  
+
+  float fltHumidity;
   bool tempSuccess = GetThermometerValue(weatherData.Temperature, fltHumidity);
   bool baroSuccess = GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
   bool lightSuccess = GetLightValue(weatherData.Lux);
-  
+
   weatherData.Humidity = (int)fltHumidity;
-  
+
   String radioResponse;
-  
-  Serial.println("Ready to Transmit"); 
+
+  Serial.println("Ready to Transmit");
   bool xmitSuccess = kRadio.XMitWeather(weatherData, radioResponse);
-  if(xmitSuccess){
-    Serial.println("Successful Transmit"); 
+  if (xmitSuccess) {
+    Serial.println("Successful Transmit");
     sleepTime = ParseSleepTimeResponse(radioResponse);
-  }    
-  
-  Serial.print("Next sleep time: ");  
+  }
+
+  Serial.print("Next sleep time: ");
   Serial.println(sleepTime);
-  
+
   short numberOfCycles = sleepTime / 7.5;
-  for (int i = 0; i < numberOfCycles; i++){
+  for (int i = 0; i < numberOfCycles; i++) {
     if (lightningDetected) {
       translateIRQ(mod1016.getIRQ());
       lightningDetected = false;
     }
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
-  }   
   }
-
-int ParseSleepTimeResponse(String response){
-  int sleepTimeBeginIndex = response.indexOf(":") + 1;
-  int sleepTimeEndIndex = response.indexOf("}");
-  return response.substring(sleepTimeBeginIndex,sleepTimeEndIndex).toInt();;  
 }
 
-void InitializeLightningSensor(){
+int ParseSleepTimeResponse(String response) {
+  int sleepTimeBeginIndex = response.indexOf(":") + 1;
+  int sleepTimeEndIndex = response.indexOf("}");
+  return response.substring(sleepTimeBeginIndex, sleepTimeEndIndex).toInt();;
+}
+
+void InitializeLightningSensor() {
   while (!Serial) {}
   Serial.println("Welcome to the MOD-1016!");
-   //I2C
+  //I2C
   //Wire.begin();
   mod1016.init(MOD1016IRQ_PIN);
   autoTuneCaps(MOD1016IRQ_PIN);
   //mod1016.setTuneCaps(2);
   mod1016.setOutdoors();
   mod1016.setNoiseFloor(4);
-  
+
   Serial.println("TUNE\tIN/OUT\tNOISEFLOOR");
   Serial.print(mod1016.getTuneCaps(), HEX);
   Serial.print("\t");
@@ -97,26 +97,26 @@ void InitializeLightningSensor(){
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
   mod1016.getIRQ();
-  Serial.println("after interrupt"); 
+  Serial.println("after interrupt");
 }
 
 void translateIRQ(uns8 irq) {
-  switch(irq) {
-      case 1:
-        Serial.println("NOISE DETECTED");
-        kRadio.XMitLightning("LNoise",0);
-        break;
-      case 4:
-        Serial.println("DISTURBER DETECTED");
-         kRadio.XMitLightning("LDisturber",0);
-        break;
-      case 8: 
-        Serial.println("LIGHTNING DETECTED");
-        int lightningDistance = mod1016.calculateDistance();
-        kRadio.XMitLightning("Lightning:",lightningDistance);
-        printDistance();
-        break;
-    }
+  switch (irq) {
+    case 1:
+      Serial.println("NOISE DETECTED");
+      kRadio.XMitLightning("LNoise", 0);
+      break;
+    case 4:
+      Serial.println("DISTURBER DETECTED");
+      kRadio.XMitLightning("LDisturber", 0);
+      break;
+    case 8:
+      Serial.println("LIGHTNING DETECTED");
+      int lightningDistance = mod1016.calculateDistance();
+      kRadio.XMitLightning("Lightning:", lightningDistance);
+      printDistance();
+      break;
+  }
 }
 
 void printDistance() {
@@ -130,54 +130,54 @@ void printDistance() {
   else {
     Serial.print("Lightning ~");
     Serial.print(distance);
-    Serial.println("km away\n");  
+    Serial.println("km away\n");
   }
 }
 
-void InitializeBarometer(){
-  Serial.println("Pressure Sensor Test"); 
+void InitializeBarometer() {
+  Serial.println("Pressure Sensor Test");
   Serial.println("");
-  if(!bmp.begin())
+  if (!bmp.begin())
   {
     /* There was a problem detecting the BMP280 ... check your connections */
     Serial.print("Ooops, no BMP280 detected ... Check your wiring or I2C ADDR!");
-    while(1);
-  }  
- 
+    while (1);
+  }
+
   delay(500);
 }
 
-void InitializeThermometer(){
+void InitializeThermometer() {
   Serial.println("DHT22 initialize!");
   dht.begin();
 }
 
-bool InitializeLightSensor(){
+bool InitializeLightSensor() {
   Serial.println("Light Sensor Test"); Serial.println("");
-  
+
   /* Initialise the sensor */
-  if(!tsl.begin())
+  if (!tsl.begin())
   {
     /* There was a problem detecting the TSL2561 ... check your connections */
     Serial.print("Ooops, no TSL2561 detected ... Check your wiring or I2C ADDR!");
-    while(1);
+    while (1);
     return false;
   }
-  
+
   /* Display some basic information on this sensor */
   displaySensorDetails();
-  
+
   /* Setup the sensor gain and integration time */
   configureSensor();
   return true;
 }
 
-bool GetLightValue(float &lux){
-  /* Get a new sensor event */ 
+bool GetLightValue(float &lux) {
+  /* Get a new sensor event */
   delay(500);
   sensors_event_t event;
   tsl.getEvent(&event);
- 
+
   /* Display the results (light is measured in lux) */
   if (event.light)
   {
@@ -191,10 +191,10 @@ bool GetLightValue(float &lux){
     Serial.println("Sensor overload");
   }
 }
-bool GetThermometerValue(float &temperature, float &humidity){
+bool GetThermometerValue(float &temperature, float &humidity) {
   humidity = dht.readHumidity();
   temperature = dht.readTemperature();
-   
+
   Serial.print("Humidity: ");
   Serial.print(humidity);
   Serial.println(" %\t");
@@ -204,29 +204,29 @@ bool GetThermometerValue(float &temperature, float &humidity){
   return true;
 }
 
-bool GetBarometerValue(float &barometerValue, float &temperature){
-    
-    temperature = bmp.readTemperature();
-    barometerValue = bmp.readPressure() / 100;
-   
-    Serial.print(F("Baro Temperature = "));
-    Serial.print(bmp.readTemperature());
-    Serial.println(" *C");
-   
-    float SeaLevelbarometerValue = seaLevelForAltitude(stationAltitude, barometerValue );    
-        
-    Serial.print("Raw Pressure: ");
-    Serial.println(barometerValue);
-    Serial.print("Sea Level Pressure: ");
-    Serial.println(SeaLevelbarometerValue);
+bool GetBarometerValue(float &barometerValue, float &temperature) {
+
+  temperature = bmp.readTemperature();
+  barometerValue = bmp.readPressure() / 100;
+
+  Serial.print(F("Baro Temperature = "));
+  Serial.print(bmp.readTemperature());
+  Serial.println(" *C");
+
+  float SeaLevelbarometerValue = seaLevelForAltitude(stationAltitude, barometerValue );
+
+  Serial.print("Raw Pressure: ");
+  Serial.println(barometerValue);
+  Serial.print("Sea Level Pressure: ");
+  Serial.println(SeaLevelbarometerValue);
 }
 
 
 
 /**************************************************************************/
 /*!
-    Calculates the pressure at sea level (in hPa) from the specified altitude 
-    (in meters), and atmospheric pressure (in hPa).  
+    Calculates the pressure at sea level (in hPa) from the specified altitude
+    (in meters), and atmospheric pressure (in hPa).
 
     @param  altitude      Altitude in meters
     @param  atmospheric   Atmospheric pressure in hPa
@@ -240,8 +240,8 @@ float seaLevelForAltitude(float altitude, float atmospheric)
   // Note that using the equation from wikipedia can give bad results
   // at high altitude.  See this thread for more information:
   //  http://forums.adafruit.com/viewtopic.php?f=22&t=58064
-  
-  return atmospheric / pow(1.0 - (altitude/44330.0), 5.255);
+
+  return atmospheric / pow(1.0 - (altitude / 44330.0), 5.255);
 }
 
 /**************************************************************************/
@@ -255,13 +255,13 @@ void configureSensor(void)
   // tsl.setGain(TSL2561_GAIN_1X);      /* No gain ... use in bright light to avoid sensor saturation */
   // tsl.setGain(TSL2561_GAIN_16X);     /* 16x gain ... use in low light to boost sensitivity */
   tsl.enableAutoRange(true);            /* Auto-gain ... switches automatically between 1x and 16x */
-  
+
   /* Changing the integration time gives you better sensor resolution (402ms = 16-bit data) */
   tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_13MS);      /* fast but low resolution */
   // tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_101MS);  /* medium resolution and speed   */
   // tsl.setIntegrationTime(TSL2561_INTEGRATIONTIME_402MS);  /* 16-bit data but slowest conversions */
 
-  /* Update these values depending on what you've set above! */  
+  /* Update these values depending on what you've set above! */
   Serial.println("------------------------------------");
   Serial.print  ("Gain:         "); Serial.println("Auto");
   Serial.print  ("Timing:       "); Serial.println("13 ms");
@@ -284,7 +284,7 @@ void displaySensorDetails(void)
   Serial.print  ("Unique ID:    "); Serial.println(sensor.sensor_id);
   Serial.print  ("Max Value:    "); Serial.print(sensor.max_value); Serial.println(" lux");
   Serial.print  ("Min Value:    "); Serial.print(sensor.min_value); Serial.println(" lux");
-  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" lux");  
+  Serial.print  ("Resolution:   "); Serial.print(sensor.resolution); Serial.println(" lux");
   Serial.println("------------------------------------");
   Serial.println("");
   delay(500);
