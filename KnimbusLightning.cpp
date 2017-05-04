@@ -1,16 +1,17 @@
 #include "KnimbusLightning.h"
 
-
-void KnimbusLightning::InitializeLightningSensor(int irqPin) {
+void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor) {
   while (!Serial) {}
   Serial.println("Welcome to the MOD-1016!");
   //I2C
-  //Wire.begin();
   mod1016.init(irqPin);
   autoTuneCaps(irqPin);
   //mod1016.setTuneCaps(2);
-  mod1016.setOutdoors();
-  mod1016.setNoiseFloor(4);
+  if(indoorMode) mod1016.setIndoors();
+  else mod1016.setOutdoors();
+  
+ 
+  mod1016.setNoiseFloor(noiseFloor);
 
   Serial.println("TUNE\tIN/OUT\tNOISEFLOOR");
   Serial.print(mod1016.getTuneCaps(), HEX);
@@ -23,6 +24,8 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin) {
   mod1016.getIRQ();
   Serial.println("after interrupt");
 }
+
+
 
 void KnimbusLightning::printDistance() {
   int distance = mod1016.calculateDistance();
@@ -39,20 +42,21 @@ void KnimbusLightning::printDistance() {
   }
 }
 
-void KnimbusLightning::translateIRQ(uns8 irq) {
+void KnimbusLightning::translateIRQ(String &eventType, int &distance) {
+  uns8 irq = mod1016.getIRQ();
   switch (irq) {
     case 1:
+      eventType = "Noise";
       Serial.println("NOISE DETECTED");
-      kRadio.XMitLightning("LNoise", 0);
       break;
     case 4:
+      eventType = "Disturber";
       Serial.println("DISTURBER DETECTED");
-      kRadio.XMitLightning("LDisturber", 0);
       break;
     case 8:
+      eventType = "Lightning";
       Serial.println("LIGHTNING DETECTED");
-      int lightningDistance = mod1016.calculateDistance();
-      kRadio.XMitLightning("Lightning:", lightningDistance);
+      distance = mod1016.calculateDistance();
       printDistance();
       break;
   }

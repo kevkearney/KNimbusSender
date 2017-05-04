@@ -9,13 +9,12 @@
 
 #include <Arduino.h>
 #include <AS3935mod.h>
-#include "KnimbusRadio.h"
 
 class KnimbusLightning
 {
   public:
-    void InitializeLightningSensor(int irqPin);
-    void translateIRQ(uns8 irq);
+    void InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor);
+    void translateIRQ(String &eventType, int &distance);
   private:
     void printDistance();
 	
