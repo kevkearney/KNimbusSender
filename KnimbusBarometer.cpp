@@ -8,12 +8,12 @@ KnimbusBarometer::KnimbusBarometer(int stationAltitude){
 }
 
 void KnimbusBarometer::InitializeBarometer() {
-  Serial.println("Pressure Sensor Test");
+  Serial.println(F("Pressure Sensor Test"));
   Serial.println("");
   if (!bmp.begin())
   {
     /* There was a problem detecting the BMP280 ... check your connections */
-    Serial.print("Ooops, no BMP280 detected ... Check your wiring or I2C ADDR!");
+    Serial.print(F("Ooops, no BMP280 detected"));
     while (1);
   }
   delay(500);
@@ -38,13 +38,13 @@ bool KnimbusBarometer::GetBarometerValue(float &barometerValue, float &temperatu
 
   Serial.print(F("Baro Temperature = "));
   Serial.print(bmp.readTemperature());
-  Serial.println(" *C");
+  Serial.println(F(" *C"));
 
   float SeaLevelbarometerValue = seaLevelForAltitude(_stationaltitude, barometerValue );
 
-  Serial.print("Raw Pressure: ");
+  Serial.print(F("Raw Pressure: "));
   Serial.println(barometerValue);
-  Serial.print("Sea Level Pressure: ");
+  Serial.print(F("Sea Level Pressure: "));
   Serial.println(SeaLevelbarometerValue);
 }
 

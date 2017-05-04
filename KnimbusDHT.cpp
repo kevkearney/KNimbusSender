@@ -3,18 +3,18 @@
 DHT dht(DHTPIN, DHTTYPE);
 
 void KnimbusDHT::InitializeThermometer() {
-  Serial.println("DHT22 initialize!");
+  Serial.println(F("DHT22 initialize!"));
   dht.begin();
 }
 bool KnimbusDHT::GetThermometerValue(float &temperature, float &humidity) {
   humidity = dht.readHumidity();
   temperature = dht.readTemperature();
 
-  Serial.print("Humidity: ");
+  Serial.print(F("Humidity: "));
   Serial.print(humidity);
-  Serial.println(" %\t");
-  Serial.print("Temperature: ");
+  Serial.println(F(" %\t"));
+  Serial.print(F("Temperature: "));
   Serial.print(temperature);
-  Serial.println(" *C ");
+  Serial.println(F(" *C "));
   return true;
 }

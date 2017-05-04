@@ -2,27 +2,25 @@
 
 void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor) {
   while (!Serial) {}
-  Serial.println("Welcome to the MOD-1016!");
+  Serial.println(F("Welcome to the MOD-1016!"));
   //I2C
   mod1016.init(irqPin);
   autoTuneCaps(irqPin);
   //mod1016.setTuneCaps(2);
   if(indoorMode) mod1016.setIndoors();
   else mod1016.setOutdoors();
-  
- 
   mod1016.setNoiseFloor(noiseFloor);
 
-  Serial.println("TUNE\tIN/OUT\tNOISEFLOOR");
+  Serial.println(F("TUNE\tIN/OUT\tNOISEFLOOR"));
   Serial.print(mod1016.getTuneCaps(), HEX);
-  Serial.print("\t");
+  Serial.print(F("\t"));
   Serial.print(mod1016.getAFE(), BIN);
-  Serial.print("\t");
+  Serial.print(F("\t"));
   Serial.println(mod1016.getNoiseFloor(), HEX);
-  Serial.print("\n");
+  Serial.print(F("\n"));
  
   mod1016.getIRQ();
-  Serial.println("after interrupt");
+  Serial.println(F("after interrupt"));
 }
 
 
@@ -30,15 +28,15 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, in
 void KnimbusLightning::printDistance() {
   int distance = mod1016.calculateDistance();
   if (distance == -1)
-    Serial.println("Lightning out of range");
+    Serial.println(F("Lightning out of range"));
   else if (distance == 1)
-    Serial.println("Distance not in table");
+    Serial.println(F("Distance not in table"));
   else if (distance == 0)
-    Serial.println("Lightning overhead");
+    Serial.println(F("Lightning overhead"));
   else {
-    Serial.print("Lightning ~");
+    Serial.print(F("Lightning ~"));
     Serial.print(distance);
-    Serial.println("km away\n");
+    Serial.println(F("km away\n"));
   }
 }
 
@@ -47,15 +45,15 @@ void KnimbusLightning::translateIRQ(String &eventType, int &distance) {
   switch (irq) {
     case 1:
       eventType = "Noise";
-      Serial.println("NOISE DETECTED");
+      Serial.println(F("NOISE DETECTED"));
       break;
     case 4:
       eventType = "Disturber";
-      Serial.println("DISTURBER DETECTED");
+      Serial.println(F("DISTURBER DETECTED"));
       break;
     case 8:
       eventType = "Lightning";
-      Serial.println("LIGHTNING DETECTED");
+      Serial.println(F("LIGHTNING DETECTED"));
       distance = mod1016.calculateDistance();
       printDistance();
       break;

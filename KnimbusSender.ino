@@ -28,6 +28,7 @@ void HandleLightning(){
   int distance = -1;
   kLightning.translateIRQ(eventType, distance);
   kRadio.XMitLightning(eventType, distance);  
+  lightningDetected = false;
 }
 
 int ParseSleepTimeResponse(String response) {
@@ -57,26 +58,24 @@ void loop() {
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, fltHumidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
-
   weatherData.Humidity = (int)fltHumidity;
 
   String radioResponse;
 
-  Serial.println("Ready to Transmit");
+  Serial.println(F("Ready to Transmit"));
   bool xmitSuccess = kRadio.XMitWeather(weatherData, radioResponse);
   if (xmitSuccess) {
-    Serial.println("Successful Transmit");
+    Serial.println(F("Successful Transmit"));
     sleepTime = ParseSleepTimeResponse(radioResponse);
   }
 
-  Serial.print("Next sleep time: ");
+  Serial.print(F("Next sleep time: "));
   Serial.println(sleepTime);
 
   short numberOfCycles = sleepTime / 7.5;
   for (int i = 0; i < numberOfCycles; i++) {
     if (lightningDetected) {
-      
-      lightningDetected = false;
+      HandleLightning();      
     }
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   }
