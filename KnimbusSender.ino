@@ -1,7 +1,3 @@
-
-
-
-
 #include "KnimbusRadio.h"
 #include "KnimbusBarometer.h"
 #include "KnimbusLux.h"
@@ -9,9 +5,6 @@
 #include "KnimbusDHT.h"
 
 #include <LowPower.h>
-
-
-
 
 const short stationAltitude = 342;
 short sleepTime = 10;
