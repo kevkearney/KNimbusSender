@@ -80,7 +80,7 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &resp
 
   while ( ! radio.available() ) {
     //Serial.println(F("Waiting for response."));// While nothing is received
-    if (micros() - started_waiting_at > 200000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
+    if (micros() - started_waiting_at > 2000000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
       timeout = true;
       break;
     }
@@ -90,8 +90,11 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &resp
     Serial.println(F("Failed, response timed out."));
     return false;
   } else {
-    //char got_payload[32] = {0};                                 // Grab the response, compare, and send to debugging spew
-    radio.read( &responseMsg, sizeof(responseMsg));
+    //char got_payload[32] = {0};   
+    // Grab the response, compare, and send to debugging spew
+
+    String response;
+    radio.read( &response, sizeof(response));
 
     // Spew it
     Serial.print(F(", Got response "));

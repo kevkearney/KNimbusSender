@@ -35,7 +35,7 @@ void HandleLightning(){
 void setup() {
   delay(3000);
   Serial.begin(9600);
-
+  pinMode(LED_BUILTIN, OUTPUT);
   weatherControl.sleepTime = 10;
   weatherControl.lightningIndoors = false;
   weatherControl.lightningTune = 0;
@@ -53,6 +53,10 @@ void setup() {
 }
 
 void loop() {
+   digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
+  delay(1000);                       // wait for a second
+  digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
+  delay(1000);   
   Weather_t weatherData;
 
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
