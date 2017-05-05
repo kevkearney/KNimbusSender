@@ -1,3 +1,4 @@
+
 #include "KnimbusBarometer.h"
 
 Adafruit_BME280 bmp; // I2C
@@ -31,21 +32,30 @@ float KnimbusBarometer::seaLevelForAltitude(float altitude, float atmospheric)
   return atmospheric / pow(1.0 - (altitude / 44330.0), 5.255);
 }
 
-bool KnimbusBarometer::GetBarometerValue(float &barometerValue, float &temperature) {
+bool KnimbusBarometer::GetBarometerValue(int &barometerValue, int &temperature) {
 
-  temperature = bmp.readTemperature();
-  barometerValue = bmp.readPressure() / 100;
+  float fltTemperature = bmp.readTemperature();
+  float fltBarometerValue = bmp.readPressure() / 10;
 
+  barometerValue = (int)fltBarometerValue;
+  temperature = (int)(fltTemperature * 100);
+  
+  
   Serial.print(F("Baro Temperature = "));
-  Serial.print(bmp.readTemperature());
+  Serial.print(temperature);
   Serial.println(F(" *C"));
-
-  float SeaLevelbarometerValue = seaLevelForAltitude(_stationaltitude, barometerValue );
-
   Serial.print(F("Raw Pressure: "));
   Serial.println(barometerValue);
-  Serial.print(F("Sea Level Pressure: "));
-  Serial.println(SeaLevelbarometerValue);
+
+    Serial.print(F("Baro Temperature = "));
+  Serial.print(fltTemperature);
+  Serial.println(F(" *C"));
+  Serial.print(F("Raw Pressure: "));
+  Serial.println(fltBarometerValue);
+  
+   float SeaLevelbarometerValue = seaLevelForAltitude(_stationaltitude, fltBarometerValue );
+  //Serial.print(F("Sea Level Pressure: "));
+  //Serial.println(SeaLevelbarometerValue);
 }
 
 

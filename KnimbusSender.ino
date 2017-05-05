@@ -5,6 +5,7 @@
 #include "KnimbusDHT.h"
 
 #include <LowPower.h>
+#include <EEPROM.h>
 
 const short stationAltitude = 342;
 short sleepTime = 10;
@@ -26,7 +27,7 @@ void alert() {
 void HandleLightning(){
   String eventType;
   int distance = -1;
-  kLightning.translateIRQ(eventType, distance);
+  kLightning.TranslateIRQ(eventType, distance);
   kRadio.XMitLightning(eventType, distance);  
   lightningDetected = false;
 }
@@ -43,23 +44,20 @@ void setup() {
   kRadio.SetupRadio();
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
-
-  pinMode(MOD1016IRQ_PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
-  
   kLux.InitializeLightSensor();
+  
+  pinMode(MOD1016IRQ_PIN, INPUT);
+  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);  
   kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, false, 4);
 }
 
 void loop() {
   Weather_t weatherData;
 
-  float fltHumidity;
-  bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, fltHumidity);
+  bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
-  weatherData.Humidity = (int)fltHumidity;
-
+ 
   String radioResponse;
 
   Serial.println(F("Ready to Transmit"));

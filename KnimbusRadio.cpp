@@ -19,7 +19,7 @@ bool KnimbusRadio::XMitWeather(Weather_t weatherData, const String &responseMsg)
   return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
 }
 
-bool KnimbusRadio::XMitLightning(String lightningType, int lightningDistance) {
+void KnimbusRadio::XMitLightning(String lightningType, int lightningDistance) {
   String lightningMessage;
   if (lightningDistance > 0) {
     lightningMessage = lightningType + lightningDistance;

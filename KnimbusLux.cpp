@@ -42,7 +42,7 @@ bool KnimbusLux::InitializeLightSensor() {
   return true;
 }
 
-bool KnimbusLux::GetLightValue(float &lux) {
+bool KnimbusLux::GetLightValue(unsigned int &lux) {
   /* Get a new sensor event */
   delay(500);
   sensors_event_t event;
@@ -51,8 +51,8 @@ bool KnimbusLux::GetLightValue(float &lux) {
   /* Display the results (light is measured in lux) */
   if (event.light)
   {
-    lux = event.light;
-    Serial.print(event.light); Serial.println(F(" lux"));
+    lux = (unsigned int)event.light;
+    Serial.print(lux); Serial.println(F(" lux"));
   }
   else
   {

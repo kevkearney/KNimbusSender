@@ -14,7 +14,7 @@ class KnimbusBarometer
     //altitude is in meters
     KnimbusBarometer(int stationAltitude);
     void InitializeBarometer();
-    bool GetBarometerValue(float &barometerValue, float &temperature);
+    bool GetBarometerValue(int &barometerValue, int &temperature);
   private:
     float seaLevelForAltitude(float altitude, float atmospheric);
     int _stationAltitude;

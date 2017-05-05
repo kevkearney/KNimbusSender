@@ -13,7 +13,7 @@ class KnimbusLux
 {
   public:    
     bool InitializeLightSensor();
-    bool GetLightValue(float &lux);
+    bool GetLightValue(unsigned int &lux);    
   private:
     void displaySensorDetails();
     void configureSensor();

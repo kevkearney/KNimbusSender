@@ -12,11 +12,11 @@
 
 //Weather Struct
 typedef struct {
-  float Temperature;
-  unsigned int Humidity;
-  float BaroPressure;
-  float BaroTemperature;
-  float Lux;
+  int Temperature;
+  int Humidity;
+  int BaroPressure;
+  int BaroTemperature;
+  unsigned int Lux;
 }
 Weather_t;
 
@@ -25,7 +25,7 @@ class KnimbusRadio
   public:
     void SetupRadio();
     bool XMitWeather(Weather_t weatherData, const String &responseMsg);
-    bool XMitLightning(String lightningType, int lightningDistance);
+    void XMitLightning(String lightningType, int lightningDistance);
   private:
     bool PowerOnRadioAndXMit(void* buf, int size, const String &responseMsg);
 };

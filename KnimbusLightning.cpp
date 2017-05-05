@@ -23,8 +23,6 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, in
   Serial.println(F("after interrupt"));
 }
 
-
-
 void KnimbusLightning::printDistance() {
   int distance = mod1016.calculateDistance();
   if (distance == -1)
@@ -39,20 +37,27 @@ void KnimbusLightning::printDistance() {
     Serial.println(F("km away\n"));
   }
 }
+void KnimbusLightning::DisableDisturbers(){
+  mod1016.disableDisturbers();
+}
 
-void KnimbusLightning::translateIRQ(String &eventType, int &distance) {
+void KnimbusLightning::EnableDisturbers(){
+  mod1016.enableDisturbers();
+}
+
+void KnimbusLightning::TranslateIRQ(String &eventType, int &distance) {
   uns8 irq = mod1016.getIRQ();
   switch (irq) {
     case 1:
-      eventType = "Noise";
+      eventType = "LNoise";
       Serial.println(F("NOISE DETECTED"));
       break;
     case 4:
-      eventType = "Disturber";
+      eventType = "LDisturber";
       Serial.println(F("DISTURBER DETECTED"));
       break;
     case 8:
-      eventType = "Lightning";
+      eventType = "LLightning";
       Serial.println(F("LIGHTNING DETECTED"));
       distance = mod1016.calculateDistance();
       printDistance();
