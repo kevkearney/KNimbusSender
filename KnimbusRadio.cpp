@@ -3,16 +3,38 @@
 RF24 radio(7, 8);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
 
-void KnimbusRadio::SetupRadio() {
+void KnimbusRadio::SetupRadio(int powerLevel) {
+  
   radio.begin();
   radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
-  radio.setPALevel(RF24_PA_HIGH);
+  SetPowerLevel(powerLevel);
   radio.setRetries(0, 15);                // Smallest time between retries, max no. of retries
   //radio.setPayloadSize(4);              // Here we are sending 1-byte payloads to test the call-response speed
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, and switch when writing
   radio.openReadingPipe(1, pipes[0]);
   radio.printDetails();
+}
+
+void KnimbusRadio::SetPowerLevel(int pwr){
+  
+  switch (pwr) {
+    case 0:
+      radio.setPALevel(RF24_PA_MIN);
+      break;
+    case 1:
+      radio.setPALevel(RF24_PA_LOW);
+      break;
+    case 2:
+      radio.setPALevel(RF24_PA_HIGH);
+      break;
+    case 3:
+      radio.setPALevel(RF24_PA_MAX);
+      break;
+    default:
+      radio.setPALevel(RF24_PA_MAX);
+      break; 
+   }
 }
 
 bool KnimbusRadio::XMitWeather(Weather_t weatherData, const String &responseMsg) {

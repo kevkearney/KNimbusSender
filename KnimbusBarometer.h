@@ -11,8 +11,6 @@
 class KnimbusBarometer
 {
   public:
-    //altitude is in meters
-    KnimbusBarometer(int stationAltitude);
     void InitializeBarometer();
     bool GetBarometerValue(int &barometerValue, int &temperature);
   private:

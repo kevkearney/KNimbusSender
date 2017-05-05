@@ -7,14 +7,13 @@
 #include <LowPower.h>
 #include <EEPROM.h>
 
-const short stationAltitude = 342;
-short sleepTime = 10;
+short sleepTime;
 
 #define MOD1016IRQ_PIN 2  //Lightning Sensor IRQ
 
 KnimbusRadio kRadio;
 KnimbusLux kLux;
-KnimbusBarometer kBaro(stationAltitude);
+KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
 
@@ -32,23 +31,22 @@ void HandleLightning(){
   lightningDetected = false;
 }
 
-int ParseSleepTimeResponse(String response) {
-  int sleepTimeBeginIndex = response.indexOf(":") + 1;
-  int sleepTimeEndIndex = response.indexOf("}");
-  return response.substring(sleepTimeBeginIndex, sleepTimeEndIndex).toInt();;
-}
+
 
 void setup() {
   delay(3000);
   Serial.begin(9600);
-  kRadio.SetupRadio();
+
+  sleepTime = 10;
+    
+  kRadio.SetupRadio(3);
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);  
-  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, false, 4);
+  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, false, 4,0);
 }
 
 void loop() {
@@ -64,7 +62,7 @@ void loop() {
   bool xmitSuccess = kRadio.XMitWeather(weatherData, radioResponse);
   if (xmitSuccess) {
     Serial.println(F("Successful Transmit"));
-    sleepTime = ParseSleepTimeResponse(radioResponse);
+    //sleepTime = ParseSleepTimeResponse(radioResponse);
   }
 
   Serial.print(F("Next sleep time: "));

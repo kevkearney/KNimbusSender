@@ -1,12 +1,16 @@
 #include "KnimbusLightning.h"
 
-void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor) {
+void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor, int tuneNum) {
   while (!Serial) {}
   Serial.println(F("Welcome to the MOD-1016!"));
   //I2C
   mod1016.init(irqPin);
-  autoTuneCaps(irqPin);
-  //mod1016.setTuneCaps(2);
+  
+  if (tuneNum > 0 & tuneNum <= 10)
+    mod1016.setTuneCaps(tuneNum);
+  else
+    autoTuneCaps(irqPin);
+    
   if(indoorMode) mod1016.setIndoors();
   else mod1016.setOutdoors();
   mod1016.setNoiseFloor(noiseFloor);

@@ -7,9 +7,22 @@
 #ifndef KnimbusResponseParser_h
 #define KnimbusResponseParser_h
 
+#include <Arduino.h>
+
+typedef struct {
+    int sleepTime;
+    bool lightningIndoors;
+    int lightningTune;
+    int lightningNoiseFloor;
+    int radioPower;
+    int stationAltitude;
+    
+
+} WeatherControl;
+
 class KnimbusParser
 {
   public:    
-    bool ParseRadioResponse(String response);
+    WeatherControl ParseRadioResponse(String response);
 };
 #endif

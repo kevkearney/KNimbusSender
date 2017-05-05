@@ -23,11 +23,12 @@ Weather_t;
 class KnimbusRadio
 {
   public:
-    void SetupRadio();
+    void SetupRadio(int powerlevel);
     bool XMitWeather(Weather_t weatherData, const String &responseMsg);
     void XMitLightning(String lightningType, int lightningDistance);
   private:
     bool PowerOnRadioAndXMit(void* buf, int size, const String &responseMsg);
+    void SetPowerLevel(int pwr);
 };
 #endif
 
