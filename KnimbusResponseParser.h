@@ -14,10 +14,7 @@ typedef struct {
     bool lightningIndoors;
     int lightningTune;
     int lightningNoiseFloor;
-    int radioPower;
-    int stationAltitude;
-    
-
+    int radioPower;    
 } WeatherControl;
 
 class KnimbusParser

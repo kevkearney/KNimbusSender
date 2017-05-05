@@ -1,4 +1,5 @@
 #include "KnimbusRadio.h"
+
 /* Hardware configuration: Set up nRF24L01 radio on SPI bus plus pins 7 & 8 */
 RF24 radio(7, 8);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
@@ -37,7 +38,7 @@ void KnimbusRadio::SetPowerLevel(int pwr){
    }
 }
 
-bool KnimbusRadio::XMitWeather(Weather_t weatherData, const String &responseMsg) {
+bool KnimbusRadio::XMitWeather(Weather_t weatherData, WeatherControl &responseMsg) {
   return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
 }
 
@@ -58,11 +59,11 @@ void KnimbusRadio::XMitLightning(String lightningType, int lightningDistance) {
 
   Serial.println(lightningMessage);
   Serial.println(sizeof(data));
-  String responseMsg;
+  WeatherControl responseMsg;
   PowerOnRadioAndXMit(&data, sizeof(data), responseMsg);
 }
 
-bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, const String &responseMsg) {
+bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &responseMsg) {
   radio.powerUp();
 
   delay(1000);
@@ -89,13 +90,12 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, const String &respon
     Serial.println(F("Failed, response timed out."));
     return false;
   } else {
-    char got_payload[32] = {0};                                 // Grab the response, compare, and send to debugging spew
-    radio.read( &got_payload, sizeof(got_payload));
+    //char got_payload[32] = {0};                                 // Grab the response, compare, and send to debugging spew
+    radio.read( &responseMsg, sizeof(responseMsg));
 
     // Spew it
     Serial.print(F(", Got response "));
-    Serial.print(got_payload);
-    responseMsg = got_payload;
+    Serial.print(responseMsg.radioPower);    
   }
   radio.powerDown();
   return true;

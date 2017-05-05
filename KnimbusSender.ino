@@ -3,11 +3,11 @@
 #include "KnimbusLux.h"
 #include "KnimbusLightning.h"
 #include "KnimbusDHT.h"
+#include "KnimbusResponseParser.h"
 
 #include <LowPower.h>
-#include <EEPROM.h>
 
-short sleepTime;
+WeatherControl weatherControl;
 
 #define MOD1016IRQ_PIN 2  //Lightning Sensor IRQ
 
@@ -16,6 +16,7 @@ KnimbusLux kLux;
 KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
+KnimbusParser kParser;
 
 volatile bool lightningDetected = false;
 
@@ -31,22 +32,24 @@ void HandleLightning(){
   lightningDetected = false;
 }
 
-
-
 void setup() {
   delay(3000);
   Serial.begin(9600);
 
-  sleepTime = 10;
+  weatherControl.sleepTime = 10;
+  weatherControl.lightningIndoors = false;
+  weatherControl.lightningTune = 0;
+  weatherControl.lightningNoiseFloor = 4;
+  weatherControl.radioPower = 3;   
     
-  kRadio.SetupRadio(3);
+  kRadio.SetupRadio(weatherControl.radioPower);
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);  
-  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, false, 4,0);
+  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, weatherControl.lightningIndoors, weatherControl.lightningNoiseFloor,weatherControl.lightningTune);
 }
 
 void loop() {
@@ -56,19 +59,20 @@ void loop() {
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
  
-  String radioResponse;
+  WeatherControl radioResponse;
 
   Serial.println(F("Ready to Transmit"));
   bool xmitSuccess = kRadio.XMitWeather(weatherData, radioResponse);
   if (xmitSuccess) {
     Serial.println(F("Successful Transmit"));
+    //TODO: add the response parser
     //sleepTime = ParseSleepTimeResponse(radioResponse);
   }
 
   Serial.print(F("Next sleep time: "));
-  Serial.println(sleepTime);
+  Serial.println(weatherControl.sleepTime);
 
-  short numberOfCycles = sleepTime / 7.5;
+  short numberOfCycles = weatherControl.sleepTime / 7.5;
   for (int i = 0; i < numberOfCycles; i++) {
     if (lightningDetected) {
       HandleLightning();      
