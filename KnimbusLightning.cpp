@@ -49,21 +49,24 @@ void KnimbusLightning::EnableDisturbers(){
   mod1016.enableDisturbers();
 }
 
-void KnimbusLightning::TranslateIRQ(String &eventType, int &distance) {
+void KnimbusLightning::TranslateIRQ(String &eventType, int &distance, int &intensity) {
   uns8 irq = mod1016.getIRQ();
+  intensity = -1;
+  distance = -1;
   switch (irq) {
     case 1:
-      eventType = "LNoise";
+      eventType = "Noise";            
       Serial.println(F("NOISE DETECTED"));
       break;
     case 4:
-      eventType = "LDisturber";
+      eventType = "Disturber";
       Serial.println(F("DISTURBER DETECTED"));
       break;
     case 8:
-      eventType = "LLightning";
+      eventType = "Lightning";
       Serial.println(F("LIGHTNING DETECTED"));
       distance = mod1016.calculateDistance();
+      intensity = mod1016.getIntensity();
       printDistance();
       break;
   }

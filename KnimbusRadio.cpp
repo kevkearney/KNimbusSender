@@ -4,8 +4,7 @@
 RF24 radio(7, 8);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
 
-void KnimbusRadio::SetupRadio(int powerLevel) {
-  
+void KnimbusRadio::SetupRadio(int powerLevel) {  
   radio.begin();
   radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
@@ -38,32 +37,16 @@ void KnimbusRadio::SetPowerLevel(int pwr){
    }
 }
 
-bool KnimbusRadio::XMitWeather(Weather_t weatherData, WeatherControl &responseMsg) {
+bool KnimbusRadio::XMitWeather(WeatherMsg weatherData, WeatherControlMsg &responseMsg) {
   return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
 }
 
-void KnimbusRadio::XMitLightning(String lightningType, int lightningDistance) {
-  String lightningMessage;
-  if (lightningDistance > 0) {
-    lightningMessage = lightningType + lightningDistance;
-  }
-  else {
-    lightningMessage = lightningType;
-  }
-
-  char charBuf[lightningMessage.length()];
-  lightningMessage.toCharArray(charBuf, 26);
-
-  uint8_t data[lightningMessage.length()];
-  strcpy((char*)data, charBuf);
-
-  Serial.println(lightningMessage);
-  Serial.println(sizeof(data));
-  WeatherControl responseMsg;
-  PowerOnRadioAndXMit(&data, sizeof(data), responseMsg);
+void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
+  WeatherControlMsg responseMsg;
+  PowerOnRadioAndXMit(&lightningData, sizeof(lightningData), responseMsg);
 }
 
-bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &responseMsg) {
+bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControlMsg &responseMsg) {
   radio.powerUp();
 
   delay(1000);
@@ -72,7 +55,6 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &resp
     Serial.println(F("failed"));
     return false;
   }
-
   radio.startListening();                                   // Now, continue listening
 
   unsigned long started_waiting_at = micros();               // Set up a timeout period, get the current microseconds
@@ -90,16 +72,12 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControl &resp
     Serial.println(F("Failed, response timed out."));
     return false;
   } else {
-    //char got_payload[32] = {0};   
     // Grab the response, compare, and send to debugging spew
 
-    String response;
-    radio.read( &response, sizeof(response));
-
-    // Spew it
-    Serial.print(F(", Got response "));
-    Serial.print(responseMsg.radioPower);    
+    WeatherControlMsg weathermsg;
+    radio.read( &weathermsg, sizeof(WeatherControlMsg));
   }
+  
   radio.powerDown();
   return true;
 }
