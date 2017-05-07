@@ -4,6 +4,7 @@
 #include "KnimbusLightning.h"
 #include "KnimbusDHT.h"
 #include "KnimbusRadioContracts.h"
+#include "KnimbusControlValueHelper.h"
 
 #include <LowPower.h>
 
@@ -14,8 +15,10 @@ KnimbusLux kLux;
 KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
+KnimbusControlValueHelper kValueHelper;
 
-WeatherControlMsg weatherControl;
+WeatherControlMsg WeatherControl;
+bool ControlValuesChanged = false;
 
 volatile bool lightningDetected = false;
 
@@ -23,19 +26,19 @@ void alert() {
   lightningDetected = true;
 }
 
-void HandleLightning(){
-  LightningMsg lightningData;  
+void HandleLightning() {
+  LightningMsg lightningData;
   kLightning.TranslateIRQ(lightningData.EventType, lightningData.Distance, lightningData.Intensity);
 
-  kRadio.XMitLightning(lightningData);  
+  kRadio.XMitLightning(lightningData);
   lightningDetected = false;
 }
 
-void SleepCycle(int sleepTime){
+void SleepCycle(int sleepTime) {
   short numberOfCycles = sleepTime / 7.5;
   for (int i = 0; i < numberOfCycles; i++) {
     if (lightningDetected) {
-      HandleLightning();      
+      HandleLightning();
     }
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
   }
@@ -46,53 +49,44 @@ void setup() {
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
 
-//  weatherControl.SystemReset = false;
-  weatherControl.SleepTime = 10;
-  //weatherControl.LightningIndoors = false;
-  //weatherControl.LightningTune = 0;
-  //weatherControl.LightningNoiseFloor = 4;
-  //weatherControl.RadioPower = 3;   
-    
-  kRadio.SetupRadio(3);
+  //Set initial control values
+  WeatherControl.SystemReset = false;
+  WeatherControl.SleepTime = 10;
+  WeatherControl.LightningIndoors = false;
+  WeatherControl.LightningTune = 2;
+  WeatherControl.LightningNoiseFloor = 4;
+  WeatherControl.RadioPower = 3;
+
+  kRadio.SetupRadio(WeatherControl.RadioPower);
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
-  
+
   pinMode(MOD1016IRQ_PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);  
-  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, true, 4,2);
+  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
+  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
 }
 
 void loop() {
-  WeatherDataMsg weatherData;
-  WeatherControlMsg weatherControlData;
+  if(ControlValuesChanged){
+    kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune); 
+    kRadio.SetupRadio(WeatherControl.RadioPower);
+  }
   
+  WeatherDataMsg weatherData;
+  WeatherControlMsg newWeatherControlData;
+
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
-  bool lightSuccess = kLux.GetLightValue(weatherData.Lux);  
- 
-  Serial.println(F("Ready to Transmit"));
-  bool xmitSuccess = kRadio.XMitWeather(weatherData, weatherControlData);
-  if (xmitSuccess) {
-    Serial.println(F("Successful Transmit"));
-     // Spew it
-    Serial.println(F(", Got response "));
-    Serial.print(F(",SleepTime: "));
-    Serial.println(weatherControlData.SleepTime);    
-    Serial.print(F(",lightningIndoors: "));
-    Serial.println(weatherControlData.LightningIndoors); 
-    Serial.print(F(",lightningTune: "));
-    Serial.println(weatherControlData.LightningTune); 
-    Serial.print(F(",lightningNoiseFloor: "));
-    Serial.println(weatherControlData.LightningNoiseFloor);
-    Serial.print(F(",radioPower: "));
-    Serial.println(weatherControlData.RadioPower);   
-    Serial.print(F(",systemreset: "));
-    Serial.println(weatherControlData.SystemReset);  
-  }
-  //SleepCycle(weatherControl.SleepTime); 
-}
+  bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
 
+  Serial.println(F("Ready to Transmit"));
+  bool xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
+  if (xmitSuccess) {   
+    ControlValuesChanged = kValueHelper.SetNewControlValues(WeatherControl,newWeatherControlData);
+  }
+  SleepCycle(WeatherControl.SleepTime);
+}
 
 
 

@@ -5,6 +5,7 @@ RF24 radio(7, 8);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
 
 void KnimbusRadio::SetupRadio(int powerLevel) {  
+  
   radio.begin();
   radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
@@ -13,7 +14,9 @@ void KnimbusRadio::SetupRadio(int powerLevel) {
   //radio.setPayloadSize(4);              // Here we are sending 1-byte payloads to test the call-response speed
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, and switch when writing
   radio.openReadingPipe(1, pipes[0]);
-  radio.printDetails();
+  //radio.printDetails();
+  Serial.print("Configuring Radio with Power Level: ");
+  Serial.print(powerLevel);
 }
 
 void KnimbusRadio::SetPowerLevel(int pwr){
@@ -37,7 +40,7 @@ void KnimbusRadio::SetPowerLevel(int pwr){
    }
 }
 
-bool KnimbusRadio::XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg &responseMsg) {
+bool KnimbusRadio::XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg& responseMsg) {
   return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
 }
 
@@ -46,7 +49,7 @@ void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
   PowerOnRadioAndXMit(&lightningData, sizeof(lightningData), responseMsg);
 }
 
-bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg &responseMsg) {
+bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg& responseMsg) {
   radio.powerUp();
   
   delay(1000);
@@ -72,15 +75,9 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
     Serial.println(F("Failed, response timed out."));
     return false;
   } else {
-    // Grab the response, compare, and send to debugging spew
-
-    WeatherControlMsg weathermsg;
-    radio.read( &weathermsg, 12);
-
-    Serial.print("Here this the message: ");
-    Serial.println(weathermsg.SleepTime); 
-  }
-  
+    // Grab the response
+    radio.read( &responseMsg, 12);
+  }  
   radio.powerDown();
   return true;
 }

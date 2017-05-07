@@ -33,7 +33,7 @@ WeatherDataMsg;
 //Lightning Message Struct
 typedef struct {
   byte MessageType = 2;
-  String EventType;
+  int EventType;
   int Distance;
   int Intensity;  
 }

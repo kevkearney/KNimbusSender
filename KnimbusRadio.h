@@ -17,10 +17,10 @@ class KnimbusRadio
 {
   public:
     void SetupRadio(int powerlevel);
-    bool XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg &responseMsg);
+    bool XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg& responseMsg);
     void XMitLightning(LightningMsg lightningData);
   private:
-    bool PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg &responseMsg);
+    bool PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg& responseMsg);
     void SetPowerLevel(int pwr);
 };
 #endif
