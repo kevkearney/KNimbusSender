@@ -48,7 +48,7 @@ void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
 
 bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg &responseMsg) {
   radio.powerUp();
-
+  
   delay(1000);
   radio.stopListening();
   if (!radio.write( buf, payloadSize)) {
@@ -75,7 +75,10 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
     // Grab the response, compare, and send to debugging spew
 
     WeatherControlMsg weathermsg;
-    radio.read( &weathermsg, sizeof(WeatherControlMsg));
+    radio.read( &weathermsg, 12);
+
+    Serial.print("Here this the message: ");
+    Serial.println(weathermsg.SleepTime); 
   }
   
   radio.powerDown();

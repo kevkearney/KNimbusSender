@@ -46,21 +46,21 @@ void setup() {
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
 
-  weatherControl.SystemReset = false;
+//  weatherControl.SystemReset = false;
   weatherControl.SleepTime = 10;
-  weatherControl.LightningIndoors = false;
-  weatherControl.LightningTune = 0;
-  weatherControl.LightningNoiseFloor = 4;
-  weatherControl.RadioPower = 3;   
+  //weatherControl.LightningIndoors = false;
+  //weatherControl.LightningTune = 0;
+  //weatherControl.LightningNoiseFloor = 4;
+  //weatherControl.RadioPower = 3;   
     
-  kRadio.SetupRadio(weatherControl.RadioPower);
+  kRadio.SetupRadio(3);
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);  
-  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, weatherControl.LightningIndoors, weatherControl.LightningNoiseFloor,weatherControl.LightningTune);
+  kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, true, 4,2);
 }
 
 void loop() {
@@ -90,7 +90,7 @@ void loop() {
     Serial.print(F(",systemreset: "));
     Serial.println(weatherControlData.SystemReset);  
   }
-  SleepCycle(weatherControl.SleepTime); 
+  //SleepCycle(weatherControl.SleepTime); 
 }
 
 
