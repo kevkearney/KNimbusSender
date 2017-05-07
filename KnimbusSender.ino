@@ -64,7 +64,7 @@ void setup() {
 }
 
 void loop() {
-  WeatherMsg weatherData;
+  WeatherDataMsg weatherData;
   WeatherControlMsg weatherControlData;
   
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);

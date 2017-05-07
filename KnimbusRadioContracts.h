@@ -21,16 +21,18 @@ typedef struct {
 
 //Weather Message Struct
 typedef struct {
+  byte MessageType = 1;
   int Temperature;
   int Humidity;
   int BaroPressure;
   int BaroTemperature;
   unsigned int Lux;
 }
-WeatherMsg;
+WeatherDataMsg;
 
 //Lightning Message Struct
 typedef struct {
+  byte MessageType = 2;
   String EventType;
   int Distance;
   int Intensity;  

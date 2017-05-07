@@ -37,7 +37,7 @@ void KnimbusRadio::SetPowerLevel(int pwr){
    }
 }
 
-bool KnimbusRadio::XMitWeather(WeatherMsg weatherData, WeatherControlMsg &responseMsg) {
+bool KnimbusRadio::XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg &responseMsg) {
   return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
 }
 
@@ -46,12 +46,12 @@ void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
   PowerOnRadioAndXMit(&lightningData, sizeof(lightningData), responseMsg);
 }
 
-bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControlMsg &responseMsg) {
+bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg &responseMsg) {
   radio.powerUp();
 
   delay(1000);
   radio.stopListening();
-  if (!radio.write( buf, size)) {
+  if (!radio.write( buf, payloadSize)) {
     Serial.println(F("failed"));
     return false;
   }
@@ -61,8 +61,8 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int size, WeatherControlMsg &r
   boolean timeout = false;                                   // Set up a variable to indicate if a response was received or not
 
   while ( ! radio.available() ) {
-    //Serial.println(F("Waiting for response."));// While nothing is received
-    if (micros() - started_waiting_at > 2000000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
+    Serial.println(F("Waiting for response."));// While nothing is received
+    if (micros() - started_waiting_at > 200000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
       timeout = true;
       break;
     }
