@@ -9,26 +9,18 @@
 
 #include <RF24.h>
 #include <Arduino.h>
-#include "KnimbusResponseParser.h"
+#include "KnimbusRadioContracts.h"
 
-//Weather Struct
-typedef struct {
-  int Temperature;
-  int Humidity;
-  int BaroPressure;
-  int BaroTemperature;
-  unsigned int Lux;
-}
-Weather_t;
+
 
 class KnimbusRadio
 {
   public:
     void SetupRadio(int powerlevel);
-    bool XMitWeather(Weather_t weatherData, WeatherControl &responseMsg);
-    void XMitLightning(String lightningType, int lightningDistance);
+    bool XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg& responseMsg);
+    void XMitLightning(LightningMsg lightningData);
   private:
-    bool PowerOnRadioAndXMit(void* buf, int size, WeatherControl &responseMsg);
+    bool PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg& responseMsg);
     void SetPowerLevel(int pwr);
 };
 #endif
