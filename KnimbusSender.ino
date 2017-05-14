@@ -21,6 +21,9 @@ KnimbusControlValueHelper kValueHelper;
 WeatherControlMsg WeatherControl;
 bool ControlValuesChanged = false;
 
+int RadioFailureCount = 0;
+int RadioFailureLimit = 3;
+
 volatile bool lightningDetected = false;
 
 void alert() {
@@ -92,16 +95,23 @@ void loop() {
   WeatherControlMsg newWeatherControlData;
 
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
-  bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
+  bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
 
   Serial.println(F("Ready to Transmit"));
   //kLightning.DisableDisturbers();  
   bool xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
   
-  if (xmitSuccess) {   
+  if (xmitSuccess) {  
+    RadioFailureCount = 0; 
     ControlValuesChanged = kValueHelper.SetNewControlValues(WeatherControl,newWeatherControlData);
-  }  
+  }  else
+  {
+    RadioFailureCount++;
+    if(RadioFailureCount >= RadioFailureLimit){
+      kRadio.SetupRadio(3);
+    }
+  }
   //kLightning.EnableDisturbers();
   wdt_reset();
   SleepCycle(WeatherControl.SleepTime);

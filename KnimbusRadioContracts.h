@@ -26,6 +26,7 @@ typedef struct {
   int Humidity;
   int BaroPressure;
   int BaroTemperature;
+  int BaroHumidity;
   unsigned int Lux;
 }
 WeatherDataMsg;
