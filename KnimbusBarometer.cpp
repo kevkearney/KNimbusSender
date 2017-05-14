@@ -12,9 +12,9 @@ void KnimbusBarometer::InitializeBarometer() {
     Serial.print(F("Ooops, no bme280 detected"));
     while (1);
   }
-   Serial.println("-- Weather Station Scenario --");
-   Serial.println("forced mode, 1x temperature / 1x humidity / 1x pressure oversampling,");
-   Serial.println("filter off");
+   Serial.println(F("-- Weather Station Scenario --"));
+   Serial.println(F("forced mode, 1x temperature / 1x humidity / 1x pressure oversampling,"));
+   Serial.println(F("filter off"));
    bme.setSampling(Adafruit_BME280::MODE_FORCED,
                     Adafruit_BME280::SAMPLING_X1, // temperature
                     Adafruit_BME280::SAMPLING_X1, // pressure
@@ -39,6 +39,9 @@ bool KnimbusBarometer::GetBarometerValue(int &barometerValue, int &temperature, 
   Serial.println(F(" *C"));
   Serial.print(F("Raw Pressure: "));
   Serial.println(barometerValue);  
+   Serial.print(F("Humidity = "));
+    Serial.print(bme.readHumidity());
+    Serial.println(F(" %"));
   
 }
 
