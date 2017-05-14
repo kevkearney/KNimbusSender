@@ -1,3 +1,4 @@
+#include <avr/wdt.h>
 #include "KnimbusRadio.h"
 #include "KnimbusBarometer.h"
 #include "KnimbusLux.h"
@@ -20,6 +21,9 @@ KnimbusControlValueHelper kValueHelper;
 WeatherControlMsg WeatherControl;
 bool ControlValuesChanged = false;
 
+int RadioFailureCount = 0;
+int RadioFailureLimit = 3;
+
 volatile bool lightningDetected = false;
 
 void alert() {
@@ -27,6 +31,7 @@ void alert() {
 }
 
 void HandleLightning() {
+  Serial.println("Lightning Detected");
   LightningMsg lightningData;
   kLightning.TranslateIRQ(lightningData.EventType, lightningData.Distance, lightningData.Intensity);
 
@@ -44,9 +49,10 @@ void SleepCycle(int sleepTime) {
   }
 }
 
-void setup() {
-  delay(3000);
+void setup() {    
   Serial.begin(9600);
+  Serial.println(F("*********FULL RESET*********"));
+  delay(3000);
   pinMode(LED_BUILTIN, OUTPUT);
 
   //Set initial control values
@@ -65,26 +71,49 @@ void setup() {
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
   kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
+ 
 }
 
 void loop() {
+  wdt_enable(WDTO_8S);
+ 
+  //Hack to cause watchdog reset
+  if(WeatherControl.SystemReset)  {
+     Serial.println(F("Resetting system."));
+     while(1);
+  }
+    
+  
   if(ControlValuesChanged){
+    wdt_reset();
     kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune); 
     kRadio.SetupRadio(WeatherControl.RadioPower);
+    ControlValuesChanged = false;
   }
   
   WeatherDataMsg weatherData;
   WeatherControlMsg newWeatherControlData;
 
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
-  bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature);
+  bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
 
   Serial.println(F("Ready to Transmit"));
+  //kLightning.DisableDisturbers();  
   bool xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
-  if (xmitSuccess) {   
+  
+  if (xmitSuccess) {  
+    RadioFailureCount = 0; 
     ControlValuesChanged = kValueHelper.SetNewControlValues(WeatherControl,newWeatherControlData);
+  }  else
+  {
+    RadioFailureCount++;
+    if(RadioFailureCount >= RadioFailureLimit){
+      kRadio.SetupRadio(3);
+    }
   }
+  //kLightning.EnableDisturbers();
+  wdt_reset();
   SleepCycle(WeatherControl.SleepTime);
 }
 

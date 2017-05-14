@@ -31,5 +31,10 @@ bool KnimbusControlValueHelper::SetNewControlValues(WeatherControlMsg &weatherCo
     Serial.println(weatherControl.RadioPower);
     controlValuesChanged = true;
   }  
+   if(weatherControl.SystemReset != newWeatherControlValues.SystemReset){
+    weatherControl.SystemReset = newWeatherControlValues.SystemReset;
+    Serial.print(F("SystemReset changed to: "));
+    Serial.println(weatherControl.SystemReset);    
+  }  
   return controlValuesChanged;
 }

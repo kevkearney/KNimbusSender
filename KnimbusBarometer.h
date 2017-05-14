@@ -12,7 +12,7 @@ class KnimbusBarometer
 {
   public:
     void InitializeBarometer();
-    bool GetBarometerValue(int &barometerValue, int &temperature);
+    bool GetBarometerValue(int &barometerValue, int &temperature, int &humidity);
   private:
     float seaLevelForAltitude(float altitude, float atmospheric);
     int _stationAltitude;

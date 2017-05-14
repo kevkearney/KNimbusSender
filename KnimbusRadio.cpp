@@ -16,7 +16,7 @@ void KnimbusRadio::SetupRadio(int powerLevel) {
   radio.openReadingPipe(1, pipes[0]);
   //radio.printDetails();
   Serial.print("Configuring Radio with Power Level: ");
-  Serial.print(powerLevel);
+  Serial.println(powerLevel);
 }
 
 void KnimbusRadio::SetPowerLevel(int pwr){
@@ -41,12 +41,14 @@ void KnimbusRadio::SetPowerLevel(int pwr){
 }
 
 bool KnimbusRadio::XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg& responseMsg) {
-  return PowerOnRadioAndXMit(&weatherData, sizeof(weatherData), responseMsg);
+  return PowerOnRadioAndXMit(&weatherData, sizeof(WeatherDataMsg), responseMsg);
 }
 
 void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
   WeatherControlMsg responseMsg;
-  PowerOnRadioAndXMit(&lightningData, sizeof(lightningData), responseMsg);
+  Serial.print("Lightning Type");
+  Serial.println(lightningData.EventType);
+  PowerOnRadioAndXMit(&lightningData, sizeof(LightningMsg), responseMsg);
 }
 
 bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg& responseMsg) {
@@ -63,9 +65,9 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
   unsigned long started_waiting_at = micros();               // Set up a timeout period, get the current microseconds
   boolean timeout = false;                                   // Set up a variable to indicate if a response was received or not
 
-  while ( ! radio.available() ) {
-    Serial.println(F("Waiting for response."));// While nothing is received
-    if (micros() - started_waiting_at > 200000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
+  Serial.println(F("Waiting for response."));// While nothing is received
+  while ( ! radio.available() ) {    
+    if (micros() - started_waiting_at > 2000000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
       timeout = true;
       break;
     }
@@ -76,7 +78,9 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
     return false;
   } else {
     // Grab the response
-    radio.read( &responseMsg, 12);
+    Serial.print("Size of Payload: ");
+    Serial.println(sizeof(responseMsg));
+    radio.read( &responseMsg, sizeof(responseMsg));
   }  
   radio.powerDown();
   return true;
