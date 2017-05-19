@@ -21,10 +21,7 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, in
   Serial.print(mod1016.getAFE(), BIN);
   Serial.print(F("\t"));
   Serial.println(mod1016.getNoiseFloor(), HEX);
-  Serial.print(F("\n"));
- 
-  mod1016.getIRQ();
-  Serial.println(F("after interrupt"));
+  Serial.print(F("\n")); 
 }
 
 void KnimbusLightning::printDistance() {
@@ -49,6 +46,10 @@ void KnimbusLightning::DisableDisturbers(){
 void KnimbusLightning::EnableDisturbers(){
   mod1016.enableDisturbers();
   delay(200);
+}
+
+void KnimbusLightning::getIrq(){  
+  mod1016.getIRQ();
 }
 
 void KnimbusLightning::TranslateIRQ(int &eventType, int &distance, int &intensity) {

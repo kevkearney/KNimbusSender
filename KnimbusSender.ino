@@ -34,15 +34,19 @@ void HandleLightning() {
   Serial.println("Lightning Detected");
   LightningMsg lightningData;
   kLightning.TranslateIRQ(lightningData.EventType, lightningData.Distance, lightningData.Intensity);
-
-  kRadio.XMitLightning(lightningData);
+    
   lightningDetected = false;
+  kLightning.DisableDisturbers();  
+  delay(3000);
+  if(lightningData.EventType != -1)kRadio.XMitLightning(lightningData);
+  kLightning.EnableDisturbers();
 }
 
 void SleepCycle(int sleepTime) {
   short numberOfCycles = sleepTime / 7.5;
   for (int i = 0; i < numberOfCycles; i++) {
     if (lightningDetected) {
+      delay(3000);
       HandleLightning();
     }
     LowPower.powerDown(SLEEP_8S, ADC_OFF, BOD_OFF);
@@ -71,7 +75,7 @@ void setup() {
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
   kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
- 
+  kLightning.getIrq(); 
 }
 
 void loop() {
@@ -99,7 +103,7 @@ void loop() {
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
 
   Serial.println(F("Ready to Transmit"));
-  //kLightning.DisableDisturbers();  
+  kLightning.DisableDisturbers();  
   bool xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
   
   if (xmitSuccess) {  
@@ -112,7 +116,8 @@ void loop() {
       kRadio.SetupRadio(3);
     }
   }
-  //kLightning.EnableDisturbers();
+  //kLightning.getIrq(); 
+  kLightning.EnableDisturbers();
   wdt_reset();
   SleepCycle(WeatherControl.SleepTime);
 }

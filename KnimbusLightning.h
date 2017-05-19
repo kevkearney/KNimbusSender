@@ -15,6 +15,7 @@ class KnimbusLightning
   public:
     void InitializeLightningSensor(int irqPin, bool indoorMode, int noiseFloor, int tuneNum);
     void TranslateIRQ(int &eventType, int &distance, int &intensity);
+    void getIrq();
     void DisableDisturbers();
     void EnableDisturbers();    
   private:
