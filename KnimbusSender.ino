@@ -6,6 +6,8 @@
 #include "KnimbusDHT.h"
 #include "KnimbusRadioContracts.h"
 #include "KnimbusControlValueHelper.h"
+#include "KnimbusWind.h"
+#include <PinChangeInt.h>
 
 #include <LowPower.h>
 
@@ -17,6 +19,7 @@ KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
 KnimbusControlValueHelper kValueHelper;
+KnimbusWind kWind;
 
 WeatherControlMsg WeatherControl;
 bool ControlValuesChanged = false;
@@ -37,9 +40,14 @@ void HandleLightning() {
     
   lightningDetected = false;
   kLightning.DisableDisturbers();  
-  delay(3000);
+  delay(1000);
   if(lightningData.EventType != -1)kRadio.XMitLightning(lightningData);
   kLightning.EnableDisturbers();
+}
+
+void HandleWind() {
+ kWind.handleInterrupt();
+  
 }
 
 void SleepCycle(int sleepTime) {
@@ -71,6 +79,7 @@ void setup() {
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
+  kWind.InitializeWindSensor();
 
   pinMode(MOD1016IRQ_PIN, INPUT);
   attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
@@ -79,7 +88,7 @@ void setup() {
 }
 
 void loop() {
-  wdt_enable(WDTO_8S);
+  //wdt_enable(WDTO_8S);
  
   //Hack to cause watchdog reset
   if(WeatherControl.SystemReset)  {
@@ -101,6 +110,10 @@ void loop() {
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
+  attachPinChangeInterrupt(AnemometerPin, HandleWind, FALLING);        //Enables interrupts
+  weatherData.WindSpeed = kWind.GetWindSpeedValue();
+  detachPinChangeInterrupt(AnemometerPin);         //Disable interrupts
+  weatherData.WindDirection = kWind.GetWindDirection();
 
   Serial.println(F("Ready to Transmit"));
   kLightning.DisableDisturbers();  
@@ -116,7 +129,7 @@ void loop() {
       kRadio.SetupRadio(3);
     }
   }
-  //kLightning.getIrq(); 
+  kLightning.getIrq(); 
   kLightning.EnableDisturbers();
   wdt_reset();
   SleepCycle(WeatherControl.SleepTime);
