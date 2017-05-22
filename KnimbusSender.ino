@@ -88,7 +88,7 @@ void setup() {
 }
 
 void loop() {
-  //wdt_enable(WDTO_8S);
+  wdt_enable(WDTO_8S);
  
   //Hack to cause watchdog reset
   if(WeatherControl.SystemReset)  {
