@@ -30,6 +30,8 @@ typedef struct {
   unsigned int Lux;
   int WindSpeed;
   int WindDirection;
+  unsigned int RainClicks;
+  unsigned int Cycles;
 }
 WeatherDataMsg;
 

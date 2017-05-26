@@ -12,6 +12,7 @@
 #include <LowPower.h>
 
 #define MOD1016IRQ_PIN 2  //Lightning Sensor IRQ
+#define RainIRQ_PIN 3
 
 KnimbusRadio kRadio;
 KnimbusLux kLux;
@@ -27,10 +28,18 @@ bool ControlValuesChanged = false;
 int RadioFailureCount = 0;
 int RadioFailureLimit = 3;
 
-volatile bool lightningDetected = false;
 
-void alert() {
+bool RadioEnabled = true;
+unsigned int numberOfCycles = 0;
+volatile bool lightningDetected = false;
+volatile int rainClickCount = 0;
+
+void lightningAlert() {
   lightningDetected = true;
+}
+
+void rainAlert() {
+  rainClickCount++;
 }
 
 void HandleLightning() {
@@ -41,7 +50,7 @@ void HandleLightning() {
   lightningDetected = false;
   kLightning.DisableDisturbers();  
   delay(1000);
-  if(lightningData.EventType != -1)kRadio.XMitLightning(lightningData);
+  if(lightningData.EventType != -1 && RadioEnabled)kRadio.XMitLightning(lightningData);
   kLightning.EnableDisturbers();
 }
 
@@ -62,6 +71,7 @@ void SleepCycle(int sleepTime) {
 }
 
 void setup() {    
+  wdt_enable(WDTO_8S);
   Serial.begin(9600);
   Serial.println(F("*********FULL RESET*********"));
   delay(3000);
@@ -75,16 +85,21 @@ void setup() {
   WeatherControl.LightningNoiseFloor = 4;
   WeatherControl.RadioPower = 3;
 
-  kRadio.SetupRadio(WeatherControl.RadioPower);
+  if(RadioEnabled)kRadio.SetupRadio(WeatherControl.RadioPower);
   kBaro.InitializeBarometer();
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   kWind.InitializeWindSensor();
 
+pinMode(RainIRQ_PIN, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(RainIRQ_PIN), rainAlert, FALLING);
+
+  
   pinMode(MOD1016IRQ_PIN, INPUT);
-  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), alert, RISING);
+  attachInterrupt(digitalPinToInterrupt(MOD1016IRQ_PIN), lightningAlert, RISING);
   kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
   kLightning.getIrq(); 
+  wdt_reset();
 }
 
 void loop() {
@@ -100,26 +115,38 @@ void loop() {
   if(ControlValuesChanged){
     wdt_reset();
     kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune); 
-    kRadio.SetupRadio(WeatherControl.RadioPower);
+     if(RadioEnabled)kRadio.SetupRadio(WeatherControl.RadioPower);
     ControlValuesChanged = false;
   }
   
   WeatherDataMsg weatherData;
   WeatherControlMsg newWeatherControlData;
-
+  weatherData.Cycles = numberOfCycles;
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
+
+  Serial.print(F("Rain clicks:"));
+  Serial.println(rainClickCount);
+  Serial.print(F("Cycle Count:"));
+  Serial.println(numberOfCycles);
+  weatherData.RainClicks = rainClickCount;
+    
   attachPinChangeInterrupt(AnemometerPin, HandleWind, FALLING);        //Enables interrupts
   weatherData.WindSpeed = kWind.GetWindSpeedValue();
   detachPinChangeInterrupt(AnemometerPin);         //Disable interrupts
   weatherData.WindDirection = kWind.GetWindDirection();
 
-  Serial.println(F("Ready to Transmit"));
+ 
+  bool xmitSuccess;
   kLightning.DisableDisturbers();  
-  bool xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
+   if(RadioEnabled){
+    Serial.println(F("Ready to Transmit"));
+    xmitSuccess = kRadio.XMitWeather(weatherData, newWeatherControlData);
+   }
   
   if (xmitSuccess) {  
+    rainClickCount = 0;
     RadioFailureCount = 0; 
     ControlValuesChanged = kValueHelper.SetNewControlValues(WeatherControl,newWeatherControlData);
   }  else
@@ -132,6 +159,7 @@ void loop() {
   kLightning.getIrq(); 
   kLightning.EnableDisturbers();
   wdt_reset();
+  numberOfCycles++;
   SleepCycle(WeatherControl.SleepTime);
 }
 
