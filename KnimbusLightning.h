@@ -17,9 +17,9 @@ class KnimbusLightning
     void TranslateIRQ(int &eventType, int &distance, int &intensity);
     void getIrq();
     void DisableDisturbers();
-    void EnableDisturbers();    
+    void EnableDisturbers();
   private:
     void printDistance();
-	
+
 };
 #endif

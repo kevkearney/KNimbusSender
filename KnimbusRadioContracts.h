@@ -16,7 +16,8 @@ typedef struct {
     int LightningTune;
     int LightningNoiseFloor;
     int RadioPower;
-    bool SystemReset;    
+    bool SystemReset;  
+    bool EnableDisturbers;  
 } WeatherControlMsg;
 
 //Weather Message Struct

@@ -4,8 +4,8 @@
 RF24 radio(7, 8);
 const uint64_t pipes[2] = { 0xF0F0F0F0E1, 0xF0F0F0F0D2 };
 
-void KnimbusRadio::SetupRadio(int powerLevel) {  
-  
+void KnimbusRadio::SetupRadio(int powerLevel) {
+
   radio.begin();
   radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
@@ -19,8 +19,8 @@ void KnimbusRadio::SetupRadio(int powerLevel) {
   Serial.println(powerLevel);
 }
 
-void KnimbusRadio::SetPowerLevel(int pwr){
-  
+void KnimbusRadio::SetPowerLevel(int pwr) {
+
   switch (pwr) {
     case 0:
       radio.setPALevel(RF24_PA_MIN);
@@ -36,8 +36,8 @@ void KnimbusRadio::SetPowerLevel(int pwr){
       break;
     default:
       radio.setPALevel(RF24_PA_MAX);
-      break; 
-   }
+      break;
+  }
 }
 
 bool KnimbusRadio::XMitWeather(WeatherDataMsg weatherData, WeatherControlMsg& responseMsg) {
@@ -53,7 +53,7 @@ void KnimbusRadio::XMitLightning(LightningMsg lightningData) {
 
 bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherControlMsg& responseMsg) {
   radio.powerUp();
-  
+
   delay(1000);
   radio.stopListening();
   if (!radio.write( buf, payloadSize)) {
@@ -66,7 +66,7 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
   boolean timeout = false;                                   // Set up a variable to indicate if a response was received or not
 
   Serial.println(F("Waiting for response."));// While nothing is received
-  while ( ! radio.available() ) {    
+  while ( ! radio.available() ) {
     if (micros() - started_waiting_at > 2000000 ) {           // If waited longer than 200ms, indicate timeout and exit while loop
       timeout = true;
       break;
@@ -81,7 +81,7 @@ bool KnimbusRadio::PowerOnRadioAndXMit(void* buf, int payloadSize, WeatherContro
     Serial.print("Size of Payload: ");
     Serial.println(sizeof(responseMsg));
     radio.read( &responseMsg, sizeof(responseMsg));
-  }  
+  }
   radio.powerDown();
   return true;
 }

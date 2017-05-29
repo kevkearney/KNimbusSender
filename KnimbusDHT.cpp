@@ -8,7 +8,7 @@ void KnimbusDHT::InitializeThermometer() {
 }
 bool KnimbusDHT::GetThermometerValue(int &temperature, int &humidity) {
 
-  
+
   float fltHumidity = dht.readHumidity();
   float fltTemperature = dht.readTemperature();
 

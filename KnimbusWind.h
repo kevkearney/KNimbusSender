@@ -10,7 +10,7 @@
 #include <math.h>
 #define AnemometerPin (A1)      //The pin location of the anemometer sensor
 #define WindVanePin (A0)      //The pin location of the anemometer sensor
-#define Offset 152; 
+#define Offset 136; 
 
 class KnimbusWind
 {

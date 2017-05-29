@@ -17,8 +17,8 @@ class KnimbusDHT
 {
   public:
     void InitializeThermometer();
-    bool GetThermometerValue(int &temperature, int &humidity);    
+    bool GetThermometerValue(int &temperature, int &humidity);
   private:
-    
+
 };
 #endif

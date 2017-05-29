@@ -5,13 +5,13 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, in
   Serial.println(F("Welcome to the MOD-1016!"));
   //I2C
   mod1016.init(irqPin);
-  
+
   if (tuneNum > 0 & tuneNum <= 10)
     mod1016.setTuneCaps(tuneNum);
   else
     autoTuneCaps(irqPin);
-    
-  if(indoorMode) mod1016.setIndoors();
+
+  if (indoorMode) mod1016.setIndoors();
   else mod1016.setOutdoors();
   mod1016.setNoiseFloor(noiseFloor);
 
@@ -21,7 +21,7 @@ void KnimbusLightning::InitializeLightningSensor(int irqPin, bool indoorMode, in
   Serial.print(mod1016.getAFE(), BIN);
   Serial.print(F("\t"));
   Serial.println(mod1016.getNoiseFloor(), HEX);
-  Serial.print(F("\n")); 
+  Serial.print(F("\n"));
 }
 
 void KnimbusLightning::printDistance() {
@@ -38,17 +38,17 @@ void KnimbusLightning::printDistance() {
     Serial.println(F("km away\n"));
   }
 }
-void KnimbusLightning::DisableDisturbers(){
+void KnimbusLightning::DisableDisturbers() {
   mod1016.disableDisturbers();
   delay(200);
 }
 
-void KnimbusLightning::EnableDisturbers(){
+void KnimbusLightning::EnableDisturbers() {
   mod1016.enableDisturbers();
   delay(200);
 }
 
-void KnimbusLightning::getIrq(){  
+void KnimbusLightning::getIrq() {
   mod1016.getIRQ();
 }
 
@@ -60,7 +60,7 @@ void KnimbusLightning::TranslateIRQ(int &eventType, int &distance, int &intensit
   distance = -1;
   switch (irq) {
     case 1:
-      eventType = 1;            
+      eventType = 1;
       Serial.println(F("NOISE DETECTED"));
       break;
     case 4:
@@ -73,9 +73,6 @@ void KnimbusLightning::TranslateIRQ(int &eventType, int &distance, int &intensit
       distance = mod1016.calculateDistance();
       intensity = mod1016.getIntensity();
       printDistance();
-      break;
-    default:
-      eventType = -1;
-      break;
+      break; 
   }
 }

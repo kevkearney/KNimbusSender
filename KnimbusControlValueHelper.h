@@ -12,7 +12,7 @@
 
 class KnimbusControlValueHelper
 {
-	public:
-	  bool SetNewControlValues(WeatherControlMsg &weatherControl,WeatherControlMsg &newWeatherControlValues);
+  public:
+    bool SetNewControlValues(WeatherControlMsg &weatherControl, WeatherControlMsg &newWeatherControlValues);
 };
 #endif
