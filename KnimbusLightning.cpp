@@ -74,5 +74,8 @@ void KnimbusLightning::TranslateIRQ(int &eventType, int &distance, int &intensit
       intensity = mod1016.getIntensity();
       printDistance();
       break; 
+    default: 
+      eventType = -1;
+      break;
   }
 }
