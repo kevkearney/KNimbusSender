@@ -10,7 +10,7 @@ void KnimbusRadio::SetupRadio(int powerLevel) {
   radio.setAutoAck(1);                    // Ensure autoACK is enabled
   radio.enableAckPayload();               // Allow optional ack payloads
   SetPowerLevel(powerLevel);
-  radio.setRetries(0, 15);                // Smallest time between retries, max no. of retries
+  radio.setRetries(25, 1000);                // Smallest time between retries, max no. of retries
   //radio.setPayloadSize(4);              // Here we are sending 1-byte payloads to test the call-response speed
   radio.openWritingPipe(pipes[1]);        // Both radios listen on the same pipes by default, and switch when writing
   radio.openReadingPipe(1, pipes[0]);

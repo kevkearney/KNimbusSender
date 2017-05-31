@@ -40,22 +40,17 @@ void KnimbusLightning::printDistance() {
 }
 void KnimbusLightning::DisableDisturbers() {
   mod1016.disableDisturbers();
-  delay(200);
-}
+ }
 
 void KnimbusLightning::EnableDisturbers() {
   mod1016.enableDisturbers();
-  delay(200);
 }
 
-void KnimbusLightning::getIrq() {
-  mod1016.getIRQ();
+uns8 KnimbusLightning::getIrq() {
+  return mod1016.getIRQ();
 }
 
-void KnimbusLightning::TranslateIRQ(int &eventType, int &distance, int &intensity) {
-  uns8 irq = mod1016.getIRQ();
-  Serial.print("***MOD1016****");
-  Serial.println(irq);
+void KnimbusLightning::TranslateIRQ(uns8 irq,int &eventType, int &distance, int &intensity) {
   intensity = -1;
   distance = -1;
   switch (irq) {
