@@ -31,7 +31,7 @@ int RadioFailureCount = 0;
 int RadioFailureLimit = 3;
 
 bool RadioEnabled = true;
-bool LightningSensorEnabled = true;
+bool LightningSensorEnabled = false;
 
 unsigned int numberOfCycles = 0;
 
@@ -118,6 +118,7 @@ void loop() {
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
+  bool uvSuccess = kUv.GetUVValue(weatherData.Uv);
 
   weatherData.RainClicks = rainClickCount;
   totalRainClicks = totalRainClicks + rainClickCount;
@@ -148,9 +149,7 @@ void loop() {
   if (ControlValuesChanged) {
     wdt_reset();
     if (LightningSensorEnabled) {
-      kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
-      //if (WeatherControl.EnableDisturbers) kLightning.EnableDisturbers();
-      //else kLightning.DisableDisturbers();
+      kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);          
       kLightning.getIrq();
     }
     if (RadioEnabled)kRadio.SetupRadio(WeatherControl.RadioPower);

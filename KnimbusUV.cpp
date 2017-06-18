@@ -19,9 +19,10 @@ bool KnimbusUV::GetUVValue(unsigned int &uvValue) {
   Serial.print(F("Vis: ")); Serial.println(uv.readVisible());
   Serial.print(F("IR: ")); Serial.println(uv.readIR());
   
-  float UVindex = uv.readUV();
+  uvValue = uv.readUV();
   // the index is multiplied by 100 so to get the
-  // integer index, divide by 100!
-  uvValue = UVindex / 100.0;  
-  Serial.print("UV: ");  Serial.println(UVindex);
+  // integer index, divide by 100! 
+  
+  Serial.print(F("UV: "));  Serial.println(uvValue);
+ 
 }
