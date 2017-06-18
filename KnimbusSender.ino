@@ -7,6 +7,7 @@
 #include "KnimbusRadioContracts.h"
 #include "KnimbusControlValueHelper.h"
 #include "KnimbusWind.h"
+#include "KnimbusUV.h"
 #include <PinChangeInt.h>
 
 #include <LowPower.h>
@@ -16,6 +17,7 @@
 
 KnimbusRadio kRadio;
 KnimbusLux kLux;
+KnimbusUV kUv;
 KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
@@ -70,7 +72,7 @@ void SleepCycle(int sleepTime) {
 
 void setup() {
   wdt_enable(WDTO_8S);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(F("*********FULL RESET*********"));
 
   //Set initial control values
@@ -87,6 +89,7 @@ void setup() {
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   kWind.InitializeWindSensor();
+  kUv.InitializeUVSensor();
 
   pinMode(RainIRQ_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(RainIRQ_PIN), rainAlert, FALLING);
