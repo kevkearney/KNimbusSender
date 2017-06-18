@@ -9,7 +9,7 @@ void KnimbusBarometer::InitializeBarometer() {
   {
     /* There was a problem detecting the bme280 ... check your connections */
     Serial.print(F("Ooops, no bme280 detected"));
-    while (1);
+    delay(1000);
   }
   Serial.println(F("-- Weather Station Scenario --"));
   Serial.println(F("forced mode, 1x temperature / 1x humidity / 1x pressure oversampling,"));

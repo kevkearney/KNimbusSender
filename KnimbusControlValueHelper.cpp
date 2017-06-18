@@ -42,5 +42,11 @@ bool KnimbusControlValueHelper::SetNewControlValues(WeatherControlMsg &weatherCo
     Serial.println(weatherControl.EnableDisturbers);
     controlValuesChanged = true;
   }
+  if(weatherControl.ResetRainGauge != newWeatherControlValues.ResetRainGauge){
+    weatherControl.ResetRainGauge = newWeatherControlValues.ResetRainGauge;
+    Serial.print(F("Reset Rain Gauge changed to: "));
+    Serial.println(weatherControl.ResetRainGauge);
+    controlValuesChanged = true;
+  }
   return controlValuesChanged;
 }

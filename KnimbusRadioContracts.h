@@ -18,6 +18,7 @@ typedef struct {
     int RadioPower;
     bool SystemReset;  
     bool EnableDisturbers;  
+    bool ResetRainGauge;
 } WeatherControlMsg;
 
 //Weather Message Struct
@@ -34,6 +35,7 @@ typedef struct {
   unsigned int RainClicks;
   unsigned int Cycles;
   unsigned int TotalRainClicks;
+  unsigned int Uv;
 }
 WeatherDataMsg;
 

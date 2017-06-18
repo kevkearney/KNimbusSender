@@ -7,6 +7,7 @@
 #include "KnimbusRadioContracts.h"
 #include "KnimbusControlValueHelper.h"
 #include "KnimbusWind.h"
+#include "KnimbusUV.h"
 #include <PinChangeInt.h>
 
 #include <LowPower.h>
@@ -16,6 +17,7 @@
 
 KnimbusRadio kRadio;
 KnimbusLux kLux;
+KnimbusUV kUv;
 KnimbusBarometer kBaro;
 KnimbusLightning kLightning;
 KnimbusDHT kDHT;
@@ -29,7 +31,7 @@ int RadioFailureCount = 0;
 int RadioFailureLimit = 3;
 
 bool RadioEnabled = true;
-bool LightningSensorEnabled = true;
+bool LightningSensorEnabled = false;
 
 unsigned int numberOfCycles = 0;
 
@@ -70,7 +72,7 @@ void SleepCycle(int sleepTime) {
 
 void setup() {
   wdt_enable(WDTO_8S);
-  Serial.begin(9600);
+  Serial.begin(115200);
   Serial.println(F("*********FULL RESET*********"));
 
   //Set initial control values
@@ -87,6 +89,7 @@ void setup() {
   kDHT.InitializeThermometer();
   kLux.InitializeLightSensor();
   kWind.InitializeWindSensor();
+  kUv.InitializeUVSensor();
 
   pinMode(RainIRQ_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(RainIRQ_PIN), rainAlert, FALLING);
@@ -115,6 +118,7 @@ void loop() {
   bool tempSuccess = kDHT.GetThermometerValue(weatherData.Temperature, weatherData.Humidity);
   bool baroSuccess = kBaro.GetBarometerValue(weatherData.BaroPressure, weatherData.BaroTemperature, weatherData.BaroHumidity);
   bool lightSuccess = kLux.GetLightValue(weatherData.Lux);
+  bool uvSuccess = kUv.GetUVValue(weatherData.Uv);
 
   weatherData.RainClicks = rainClickCount;
   totalRainClicks = totalRainClicks + rainClickCount;
@@ -145,9 +149,7 @@ void loop() {
   if (ControlValuesChanged) {
     wdt_reset();
     if (LightningSensorEnabled) {
-      kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);
-      //if (WeatherControl.EnableDisturbers) kLightning.EnableDisturbers();
-      //else kLightning.DisableDisturbers();
+      kLightning.InitializeLightningSensor(MOD1016IRQ_PIN, WeatherControl.LightningIndoors, WeatherControl.LightningNoiseFloor, WeatherControl.LightningTune);          
       kLightning.getIrq();
     }
     if (RadioEnabled)kRadio.SetupRadio(WeatherControl.RadioPower);
